@@ -18,7 +18,7 @@ public class Main {
 		return true;
 	}
 
-	public static int bruteForce(ArrayList<String> pieces, ArrayList<String> selected, int selectedStringLength) {
+	public static void bruteForce(ArrayList<String> pieces, ArrayList<String> selected) {
 		int pSize=pieces.size();
 		if(pSize==0) { //다 찾았으면
 			StringBuffer flatString=new StringBuffer();
@@ -28,28 +28,16 @@ public class Main {
 
 			if(isPDNA(flatString)) {
 				answer.add(flatString.toString());
-				return flatString.length();
-			} else {
-				return 987654321;
 			}
+			return;
 		}
 
-		int answerStringLength;
 		for(int i=0; i<pSize; i++) {
 			ArrayList<String> nPieces=(ArrayList<String>) pieces.clone();
-			String picked=nPieces.remove(i);
-			selected.add(picked);
-			selectedStringLength+=picked.length();
-			answerStringLength=bruteForce(nPieces, selected, selectedStringLength); //답을 찾았으면 작은 값이 나오고, 못찾았으면 무한대 값이 나온다.
-			if(selectedStringLength*2 >= answerStringLength) { //답이 있으면서, 진행상황이 절반을 넘었다면
-				return answerStringLength;
-			}
-
-			selectedStringLength-=picked.length();
+			selected.add(nPieces.remove(i));
+			bruteForce(nPieces, selected);
 			selected.remove(selected.size()-1);
 		}
-
-		return 987654321;
 	}
 
 	//예시
@@ -70,7 +58,7 @@ public class Main {
 				list.add(line[i]);
 			}
 
-			bruteForce(list, new ArrayList<String>(),0);
+			bruteForce(list, new ArrayList<String>());
 			System.out.println(answer.first());
 			answer.clear();
 		}
