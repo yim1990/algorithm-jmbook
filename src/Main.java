@@ -41,8 +41,8 @@ public class Main {
 			selected.add(picked);
 			selectedStringLength+=picked.length();
 			answerStringLength=bruteForce(nPieces, selected, selectedStringLength); //답을 찾았으면 작은 값이 나오고, 못찾았으면 무한대 값이 나온다.
-			if(selectedStringLength*2 > answerStringLength) { //답이 있으면서, 진행상황이 절반을 넘었다면
-				break;
+			if(selectedStringLength*2 >= answerStringLength) { //답이 있으면서, 진행상황이 절반을 넘었다면
+				return answerStringLength;
 			}
 
 			selectedStringLength-=picked.length();
