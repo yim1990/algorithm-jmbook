@@ -13,22 +13,22 @@ public class Main {
 	static TreeSet<Integer> cities=null;
 	static Map<Integer, ArrayList<Integer>> edges=null;
 
-	public static void shortestPath(int v, int[][] parent) {
-		int len=parent.length;
-		for(int i=1; i<=len; i++) {
-			if(parent[v][i] == 1) {
-				cities.add(v);
-				break;
-			} else if(parent[v][i] != 0) {
-				cities.add(v);
-				shortestPath(v, parent);
+	public static void shortestPath(int v, Map<Integer, ArrayList<Integer>> parent) {
+		cities.add(v);
+		ArrayList<Integer> parentEdges=parent.get(v);
+		if(parentEdges!=null) {
+			for(Integer edge : parentEdges) {
+				if(edge == 1) {
+					return;
+				} else {
+					shortestPath(edge, parent);
+				}
 			}
 		}
 	}
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
-
 		int testcase=Integer.parseInt(br.readLine());
 
 		while(testcase-- > 0) {
@@ -52,37 +52,44 @@ public class Main {
 					edges.put(start, v);
 				}
 			}
+			long current=System.currentTimeMillis();
 
-			//TODO : Map<Integer, Integer>, Map<Integer, ArrayList<Integer>> 로 변경 50000개를 다 뒤질 수 없다
-			int[] distance=new int[edges.size()+1];
-			int[][] parent=new int[edges.size()+1][edges.size()+1];
-
-			for(int i=1; i<edges.size()+1; i++) {
-				distance[i]=-1;
-			}
+			Map<Integer, Integer> distance=new HashMap<Integer,Integer>();
+			Map<Integer, ArrayList<Integer>> parent=new HashMap<Integer, ArrayList<Integer>>();
 
 			LinkedList<Integer> queue=new LinkedList<Integer>();
 
-			distance[1]=0;
-			parent[1][0]=1;
+			distance.put(1, 0);
+			ArrayList<Integer> startParent=new ArrayList<Integer>();
+			startParent.add(1);
+			parent.put(1, startParent);
 
 			queue.push(1);
 
 			while(!queue.isEmpty()) {
 				int here=queue.poll();
 				ArrayList<Integer> edge=edges.get(here);
-				for(Integer there : edge) {
-					if(distance[there]==-1) { //미방문 노드
-						queue.push(there);
-						distance[there]=distance[here]+1;
-						parent[there][here]=here;
-					} else if(distance[there] == distance[here]+1) { //방문했으나 겹치는 노드
-						parent[there][here]=here;
+				if(edge!=null) {
+					for(Integer there : edge) {
+						if(!distance.containsKey(there)) { //미방문 노드
+							queue.add(there);
+							distance.put(there, distance.get(here)+1);
+							if(parent.containsKey(there)) {
+								parent.get(there).add(here);
+							} else {
+								ArrayList<Integer> p=new ArrayList<Integer>();
+								p.add(here);
+								parent.put(there, p);
+							}
+						} else if(distance.get(there) == distance.get(here)+1) { //방문했으나 겹치는 노드
+							parent.get(there).add(here);
+						}
 					}
 				}
 			}
 
 			shortestPath(numCity, parent);
+			cities.add(1);
 			StringBuffer sb=new StringBuffer();
 			for(Integer city : cities) {
 				sb.append(city);
@@ -91,6 +98,14 @@ public class Main {
 			sb.deleteCharAt(sb.length()-1);
 
 			System.out.println(sb);
+		
+			System.out.println((System.currentTimeMillis()-current));
+		}
+	}
+	
+	public static void printTest() {
+		for(int i=1; i<1000; i++) {
+			System.out.println(i+" "+(i+1));
 		}
 	}
 }
