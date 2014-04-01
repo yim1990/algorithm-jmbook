@@ -1,12 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 
 public class Main {
-	public static TreeSet<String> answer=new TreeSet<String>(); //순서 유지
+	public static TreeSet<String> answer=null; //순서 유지
+	public static String[] pieces=null;
+	public static int piecesLen=0;
 
 	public static boolean isPDNA(StringBuffer piece) {
 		int length=piece.length();
@@ -18,25 +20,29 @@ public class Main {
 		return true;
 	}
 
-	public static void bruteForce(ArrayList<String> pieces, ArrayList<String> selected) {
-		int pSize=pieces.size();
-		if(pSize==0) { //다 찾았으면
+	public static void bruteForce(int left) {
+		if(left==piecesLen-1) { //다 찾았으면
 			StringBuffer flatString=new StringBuffer();
-			for(String select : selected) {
-				flatString.append(select);
+			for(int i=0; i<piecesLen; i++) {
+				flatString.append(pieces[i]);
 			}
 
 			if(isPDNA(flatString)) {
 				answer.add(flatString.toString());
 			}
 			return;
-		}
-
-		for(int i=0; i<pSize; i++) {
-			ArrayList<String> nPieces=(ArrayList<String>) pieces.clone();
-			selected.add(nPieces.remove(i));
-			bruteForce(nPieces, selected);
-			selected.remove(selected.size()-1);
+		} else {
+			for(int i=left; i<piecesLen; i++) {
+				String temp=pieces[left];
+				pieces[left]=pieces[i];
+				pieces[i]=temp;
+				
+				bruteForce(left+1);
+				
+				temp=pieces[left];
+				pieces[left]=pieces[i];
+				pieces[i]=temp;
+			}
 		}
 	}
 
@@ -49,18 +55,19 @@ public class Main {
 		int testcase=Integer.parseInt(reader.readLine());
 
 		while(testcase-- > 0) {
-			String[] line=reader.readLine().split(" ");
-			int pieces=Integer.parseInt(line[0]);
+			StringTokenizer st=new StringTokenizer(reader.readLine());
+			int numPieces=Integer.parseInt(st.nextToken());
 
-			ArrayList<String> list=new ArrayList<String>();
-
-			for(int i=1; i<line.length; i++) {
-				list.add(line[i]);
+			answer=new TreeSet<String>();
+			pieces=new String[numPieces];
+			piecesLen=0;
+			
+			while(st.hasMoreTokens()) {
+				pieces[piecesLen++]=st.nextToken();
 			}
 
-			bruteForce(list, new ArrayList<String>());
+			bruteForce(0);
 			System.out.println(answer.first());
-			answer.clear();
 		}
 	}
 }
