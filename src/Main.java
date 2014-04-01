@@ -1,28 +1,28 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 
 public class Main {
 	//도시수는 2~1000개, 길의 수는 1~50000개라.. 최대 100만 개*4 byte=4백만 byte=4 MB
 	static TreeSet<Integer> cities=null;
-	static Map<Integer, ArrayList<Integer>> edges=null;
+	static int[][] edges=null;
+	static int[] edgesLen=null;
+	static int[][] parent=null;
+	static int[] parentLen=null;
 
-	public static void shortestPath(int v, Map<Integer, ArrayList<Integer>> parent) {
+	public static void shortestPath(int v) {
 		cities.add(v);
-		ArrayList<Integer> parentEdges=parent.get(v);
-		if(parentEdges!=null) {
-			for(Integer edge : parentEdges) {
-				if(edge == 1) {
-					return;
-				} else {
-					shortestPath(edge, parent);
-				}
+		int[] p=parent[v];
+		int sizeOfP=p.length;
+		for(int i=0; i<sizeOfP; i++) {
+			if(p[i]==1) {
+				return;
+			} else if(p[i]!=0) {
+				shortestPath(p[i]);
 			}
 		}
 	}
@@ -32,63 +32,53 @@ public class Main {
 		int testcase=Integer.parseInt(br.readLine());
 
 		while(testcase-- > 0) {
-			cities=new TreeSet<Integer>();
-			edges=new HashMap<Integer, ArrayList<Integer>>();
+			StringTokenizer st=new StringTokenizer(br.readLine());
+			int numCity=Integer.parseInt(st.nextToken());
+			int numRoad=Integer.parseInt(st.nextToken());
 
-			String[] numCityAndRoads=br.readLine().split(" ");
-			int numCity=Integer.parseInt(numCityAndRoads[0]);
-			int numRoad=Integer.parseInt(numCityAndRoads[1]);
+			cities=new TreeSet<Integer>();
+			edges=new int[numCity+1][numCity+1];
+			edgesLen=new int[numCity+1];
+			parent=new int[numCity+1][numCity+1];
+			parentLen=new int[numCity+1];
 
 			for(int i=0; i<numRoad; i++) {
-				String[] edgeOne=br.readLine().split(" ");
-				int start=Integer.parseInt(edgeOne[0]);
-				int end=Integer.parseInt(edgeOne[1]);
+				st=new StringTokenizer(br.readLine());
+				int start=Integer.parseInt(st.nextToken());
+				int end=Integer.parseInt(st.nextToken());
 
-				if(edges.containsKey(start)) {
-					edges.get(start).add(end);
-				} else {
-					ArrayList<Integer> v=new ArrayList<Integer>();
-					v.add(end);
-					edges.put(start, v);
-				}
+				edges[start][edgesLen[start]++]=end;
 			}
-			long current=System.currentTimeMillis();
+			//long current=System.currentTimeMillis();
 
-			Map<Integer, Integer> distance=new HashMap<Integer,Integer>();
-			Map<Integer, ArrayList<Integer>> parent=new HashMap<Integer, ArrayList<Integer>>();
+			int[] distance=new int[numCity+1];
 
 			LinkedList<Integer> queue=new LinkedList<Integer>();
 
-			distance.put(1, 0);
-			ArrayList<Integer> startParent=new ArrayList<Integer>();
-			startParent.add(1);
-			parent.put(1, startParent);
+			distance[1]=0;
+			parent[1][parentLen[1]++]=1;
 
 			queue.push(1);
 
 			while(!queue.isEmpty()) {
 				int here=queue.poll();
-				ArrayList<Integer> edge=edges.get(here);
-				if(edge!=null) {
-					for(Integer there : edge) {
-						if(!distance.containsKey(there)) { //미방문 노드
-							queue.add(there);
-							distance.put(there, distance.get(here)+1);
-							if(parent.containsKey(there)) {
-								parent.get(there).add(here);
-							} else {
-								ArrayList<Integer> p=new ArrayList<Integer>();
-								p.add(here);
-								parent.put(there, p);
-							}
-						} else if(distance.get(there) == distance.get(here)+1) { //방문했으나 겹치는 노드
-							parent.get(there).add(here);
-						}
+
+				int[] edge=edges[here];
+				int edgeLen=edgesLen[here];
+
+				for(int j=0; j<edgeLen; j++) {
+					int there=edge[j];
+					if(distance[there]==0 && there!=1) { //미방문 노드
+						queue.add(there);
+						distance[there]=distance[here]+1;
+						parent[there][parentLen[there]++]=here;
+					} else if(distance[there] == distance[here]+1) { //방문했으나 겹치는 노드
+						parent[there][parentLen[there]++]=here;
 					}
 				}
 			}
 
-			shortestPath(numCity, parent);
+			shortestPath(numCity);
 			cities.add(1);
 			StringBuffer sb=new StringBuffer();
 			for(Integer city : cities) {
@@ -98,14 +88,6 @@ public class Main {
 			sb.deleteCharAt(sb.length()-1);
 
 			System.out.println(sb);
-		
-			System.out.println((System.currentTimeMillis()-current));
-		}
-	}
-	
-	public static void printTest() {
-		for(int i=1; i<1000; i++) {
-			System.out.println(i+" "+(i+1));
 		}
 	}
 }
