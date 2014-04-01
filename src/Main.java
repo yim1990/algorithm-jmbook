@@ -17,11 +17,11 @@ public class Main {
 	public static void shortestPath(int v) {
 		cities.add(v);
 		int[] p=parent[v];
-		int sizeOfP=p.length;
+		int sizeOfP=parentLen[v];
 		for(int i=0; i<sizeOfP; i++) {
 			if(p[i]==1) {
 				return;
-			} else if(p[i]!=0) {
+			} else if(p[i]!=0 && !cities.contains(p[i])) {
 				shortestPath(p[i]);
 			}
 		}
