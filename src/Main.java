@@ -1,4 +1,8 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -25,37 +29,34 @@ public class Main {
 		return pi;
 	}
 
-	public static List<Integer> kmpSearch(String haystack, String needle) {
-		int hLen=haystack.length();
-		int nLen=needle.length();
+	public static List<Integer> getPrefixSuffix(String needle) {
 		List<Integer> ret=new ArrayList<Integer>();
-
-		//pi[i]=needle[..i]의 접미사&&접두사가 되는 문자열의 최대 길이
 		int[] pi=getPartialMatch(needle);
 
-		int begin=0, matched=0;
-		while(begin <= hLen-nLen) {
-			if(matched<nLen && haystack.charAt(begin+matched)==needle.charAt(matched)) {
-				++matched;
-				if(matched==nLen) {
-					ret.add(begin); //매칭되는 index들을 return
-				}
-			} else {
-				if(matched==0) {
-					++begin;
-				} else {
-					begin+=matched-pi[matched-1];
-					matched=pi[matched-1];
-				}
-			}
+		int k=needle.length();
+		while(k>0) {
+			ret.add(k);
+			k=pi[k-1];
 		}
 		return ret;
 	}
 
-	public static void main(String[] args) {
-		List<Integer> ret=kmpSearch("qweraabaabacsdfssd", "aabaabac");
-		System.out.println(ret);
-		List<Integer> ret2=kmpSearch("qwerabcdefghabcdefgh", "abcdefgh");
-		System.out.println(ret2);
+	public static void main(String[] args) throws IOException {
+		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+
+		String a=br.readLine();
+		String b=br.readLine();
+
+		String input=a+b;
+
+		List<Integer> ret=getPrefixSuffix(input);
+		Collections.sort(ret);
+
+		StringBuilder sb=new StringBuilder();
+		for(Integer r : ret) {
+			sb.append(r);
+			sb.append(" ");
+		}
+		System.out.println(sb);
 	}
 }
