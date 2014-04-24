@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -11,30 +12,47 @@ import java.util.StringTokenizer;
 public class Main {
 	public static Map<Integer, List<Integer>> adj;
 	public static int numLight;
-	public static int visitCount;
-	public static boolean[] visited;
 
-	public static void visit(int j) {
-		if(!visited[j]) {
-			visited[j]=true;
-			visitCount++;
-		}
+	public static Map<Integer, Integer> sccId;
+	public static Map<Integer, Integer> discovered;
+	public static Map<Integer, Integer> finished;
+	public static LinkedList<Integer> st;
+	public static int sccCounter;
+	public static int vertexCounter;
 
-		List<Integer> list=adj.get(j);
+	public static int scc(int here) {
+		int ret=vertexCounter++;
+		discovered.put(here, ret);
 
-		if(list==null) {
-			return;
-		}
+		st.push(here);
 
-		for(Integer k : list) {
-			if(!visited[k]) {
-				visited[k]=true;
-				if(j!=k) {
-					visit(k);
+		List<Integer> list=adj.get(here);
+		if(list!=null) {
+			for(Integer there : list) {
+				if(!discovered.containsKey(there)) {
+					ret=Math.min(ret,  scc(there));
+				} else if(discovered.get(there) < discovered.get(here) && finished.get(there)!=1) {
+					ret=Math.min(ret,  discovered.get(there));
 				}
 			}
 		}
+
+		if(ret == discovered.get(here)) {
+			while(true) {
+				int t=st.pop();
+				sccId.put(t, sccCounter);
+				if(t==here) {
+					break;
+				}
+			}
+			++sccCounter;
+		}
+
+		finished.put(here, 1);
+
+		return ret;
 	}
+
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
@@ -46,8 +64,6 @@ public class Main {
 			int inputNum=Integer.parseInt(t.nextToken());
 
 			adj=new HashMap<Integer, List<Integer>>();
-			visited=new boolean[numLight+1];
-			visitCount=0;
 
 			while(inputNum-- > 0) {
 				t=new StringTokenizer(br.readLine());
@@ -64,13 +80,20 @@ public class Main {
 				}
 			}
 
-			for(Integer integer :adj.keySet()) {
-				if(!visited[integer]) {
-					visit(integer);
+			sccId=new HashMap<Integer, Integer>(adj.size());
+			discovered=new HashMap<Integer, Integer>(adj.size());
+			finished=new HashMap<Integer, Integer>(adj.size());
+			st=new LinkedList<Integer>();
+			sccCounter=0;
+			vertexCounter=0;
+
+			for(Integer j : adj.keySet()) {
+				if(!discovered.containsKey(j)) {
+					scc(j);
 				}
 			}
 
-			System.out.println("Case "+i+": "+visitCount);
+			System.out.println("Case "+i+": "+sccCounter);
 			br.readLine();
 		}
 	}
