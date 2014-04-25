@@ -31,7 +31,7 @@ public class Main {
 			for(Integer there : list) {
 				if(!discovered.containsKey(there)) {
 					ret=Math.min(ret,  scc(there));
-				} else if(discovered.get(there) < discovered.get(here) && finished.get(there)!=1) {
+				} else if(discovered.containsKey(there) && discovered.get(there) < discovered.get(here) && !sccId.containsKey(there)) {
 					ret=Math.min(ret,  discovered.get(there));
 				}
 			}
